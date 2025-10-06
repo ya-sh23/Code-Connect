@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
+import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
 
 const RoomPage = () => {
@@ -18,18 +19,26 @@ const RoomPage = () => {
         audio: true,
         video: true,
       });
+      const offer = await peer.getOffer();
+      socket.emit("user:call", { to: remoteSocketId, offer });
       setMyStream(stream);
     } catch (err) {
       console.error("Error accessing media devices:", err);
     }
+  }, [remoteSocketId, socket]);
+
+  const handleIncommingCall = useCallback(({ from, offer }) => {
+    console.log(`Incomming call`, from, offer);
   }, []);
 
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
+    socket.on("incomming:call", handleIncommingCall);
     return () => {
       socket.off("user:joined", handleUserJoined);
+      socket.off("incomming:call", handleIncommingCall);
     };
-  }, [socket, handleUserJoined]);
+  }, [socket, handleUserJoined, handleIncommingCall]);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen gap-2 text-white">

@@ -1,40 +1,44 @@
+// src/service/peer.js
 class PeerService {
   constructor() {
-    if (!this.peer) {
-      this.peer = new RTCPeerConnection({
-        iceServers: [
-          {
-            urls: [
-              "stun:stun.l.google.com:19302",
-              "stun:stun1.l.google.com:19302",
-            ],
-          },
-        ],
-      });
-    }
+    this.createPeer();
   }
 
-  async getAnswer(offer) {
-    if (this.peer) {
-      await this.peer.setRemoteDescription(offer);
-      const ans = await this.peer.createAnswer();
-      await this.peer.setLocalDescription(new RTCSessionDescription(ans));
-      return ans;
-    }
-  }
-
-  async setLocalDescription(ans) {
-    if (this.peer) {
-      await this.peer.setRemoteDescription(new RTCSessionDescription(ans));
-    }
+  createPeer() {
+    this.peer = new RTCPeerConnection({
+      iceServers: [
+        {
+          urls: [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302",
+          ],
+        },
+      ],
+    });
   }
 
   async getOffer() {
+    const offer = await this.peer.createOffer();
+    await this.peer.setLocalDescription(offer);
+    return offer;
+  }
+
+  async getAnswer(offer) {
+    await this.peer.setRemoteDescription(new RTCSessionDescription(offer));
+    const ans = await this.peer.createAnswer();
+    await this.peer.setLocalDescription(ans);
+    return ans;
+  }
+
+  async setRemoteAnswer(ans) {
+    await this.peer.setRemoteDescription(new RTCSessionDescription(ans));
+  }
+
+  resetPeer() {
     if (this.peer) {
-      const offer = await this.peer.createOffer();
-      await this.peer.setLocalDescription(new RTCSessionDescription(offer));
-      return offer;
+      this.peer.close();
     }
+    this.createPeer();
   }
 }
 

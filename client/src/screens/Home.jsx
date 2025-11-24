@@ -19,7 +19,7 @@ const Home = () => {
             </p>
 
             <div className="flex items-center space-x-4 mt-8">
-              <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold shadow-lg">
+              <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold shadow-lg transition-all duration-200 ease-outhover:scale-[1.03] hover:bg-purple/30 active:scale-[0.95] active:bg-purple/40">
                 Get started
               </button>
             </div>

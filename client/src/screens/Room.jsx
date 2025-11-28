@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const RoomPage = () => {
   const socket = useSocket();
   const navigate = useNavigate();
-  
+
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
@@ -76,6 +76,7 @@ const RoomPage = () => {
 
   // handle socket events
   useEffect(() => {
+    console.log("Setting up socket listeners in Room");
     socket.on("user:joined", handleUserJoined);
     socket.on("incoming:call", handleIncomingCall);
     socket.on("call:accepted", handleCallAccepted);
@@ -111,26 +112,30 @@ const RoomPage = () => {
       {remoteSocketId && (
         <>
           {!isCallActive ? (
-            <button className="bg-green-600 px-6 py-3 rounded-lg cursor-pointer"
-            onClick={async()=>{
-              await handleCallUser();
-              setIsCallActive(true);
-            }}>
+            <button
+              className="bg-green-600 px-6 py-3 rounded-lg cursor-pointer"
+              onClick={async () => {
+                await handleCallUser();
+                setIsCallActive(true);
+              }}
+            >
               📞 Call
             </button>
           ) : (
             <button
-            className="bg-red-600 px-6 py-3 rounded-lg cursor-pointer"
-            onClick={()=>{
-              peer.peer.close();
-              myStream?.getTracks().forEach((track)=>track.stop());
-              setMyStream(null);
-              setRemoteStream(null);
-              setIsCallActive(false);
-              setRemoteSocketId(null);
-              navigate("/");
-            }}
-            >🔴 Disconnect</button>
+              className="bg-red-600 px-6 py-3 rounded-lg cursor-pointer"
+              onClick={() => {
+                peer.peer.close();
+                myStream?.getTracks().forEach((track) => track.stop());
+                setMyStream(null);
+                setRemoteStream(null);
+                setIsCallActive(false);
+                setRemoteSocketId(null);
+                navigate("/");
+              }}
+            >
+              🔴 Disconnect
+            </button>
           )}
         </>
       )}

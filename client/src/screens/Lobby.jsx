@@ -4,7 +4,8 @@ import { useSocket } from "../context/SocketProvider";
 import Navbar from "../components/Navbar";
 
 const LobbyScreen = () => {
-  const [email, setEmail] = useState("");
+  const savedEmail = localStorage.getItem("email");
+  const [email, setEmail] = useState(savedEmail || "");
   const [room, setRoom] = useState("");
 
   const socket = useSocket();
@@ -20,7 +21,7 @@ const LobbyScreen = () => {
 
   const handleJoin = useCallback(
     (data) => {
-      const { email, room } = data;
+      const { room } = data;
       navigate(`/room/${room}`);
     },
     [navigate]
@@ -36,39 +37,33 @@ const LobbyScreen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-500 via-blue-600 to-purple-800 text-white">
       <Navbar />
-      <div className="flex justify-center items-center ">
+
+      <div className="flex justify-center items-center min-h-[80vh]">
         <form
           onSubmit={handleSubmitForm}
-          className="flex flex-col bg-white p-8 gap-3 rounded-2xl shadow-xl w-96 bg-white/30 backdrop-blur-md border border-white/30 "
+          className="flex flex-col bg-white/30 backdrop-blur-md p-8 gap-3 rounded-2xl shadow-xl w-96 border border-white/30 "
         >
           <h1 className="text-4xl font-bold text-white text-center">Lobby</h1>
 
-          <label htmlFor="email" className="text-white">
-            Email
-          </label>
+          <label className="text-white">Email</label>
           <input
             type="email"
-            placeholder="Enter Email"
-            id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            disabled
             className="px-4 py-2 rounded-lg border border-white/50 bg-white/30 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
 
-          <label htmlFor="room" className="text-white">
-            Room Number
-          </label>
+          <label className="text-white">Room Number</label>
           <input
             type="text"
             placeholder="Enter Room ID"
-            id="room"
             value={room}
             onChange={(e) => setRoom(e.target.value)}
             className="px-4 py-2 rounded-lg border border-white/50 bg-white/30 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
           />
 
           <button className="mt-4 bg-blue-600 rounded-lg text-white py-2 hover:bg-blue-700 transition">
-            Submit
+            Start Meeting
           </button>
         </form>
       </div>

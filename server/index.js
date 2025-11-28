@@ -1,36 +1,41 @@
-import { Server } from "socket.io";
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/db.js";
+import http from "http";
+import { initSocketServer } from "./socket/index.js";
+import authRoutes from "./routes/auth.js";
 
-const io = new Server(8000, {
-  cors: true,
+dotenv.config();
+connectDB();
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+const server = http.createServer(app);
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+  })
+);
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/auth", authRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Auth server running");
 });
 
-const emailToSocketIdMap = new Map();
-const SocketIdToEmailMap = new Map();
+console.log("About to init socket server...");
+initSocketServer(server);
+console.log("initSocketServer finished — now listening soon");
 
-io.on("connection", (socket) => {
-  console.log(`Server Connected`, socket.id);
-  socket.on("room:join", (data) => {
-    const { email, room } = data;
-    emailToSocketIdMap.set(email, socket.id);
-    SocketIdToEmailMap.set(socket.id, email);
-    io.to(room).emit("user:joined", { email, id: socket.id }); // userjoined and its details
-    socket.join(room); //another user join
-    io.to(socket.id).emit("room:join", data);
-  });
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
 
-  socket.on("user:call", ({ to, offer }) => {
-    io.to(to).emit("incoming:call", { from: socket.id, offer });
-  });
-
-  socket.on("call:accepted", ({ to, ans }) => {
-    io.to(to).emit("call:accepted", { from: socket.id, ans });
-  });
-
-  socket.on("peer:negotiation:needed", ({ to, offer }) => {
-    io.to(to).emit("peer:negotiation:needed", { from: socket.id, offer });
-  });
-
-  socket.on("peer:nego:done", ({to,ans}) => {
-    io.to(to).emit("peer:nego:final", { from: socket.id, ans });
-  });
+app.listen(PORT, () => {
+  console.log(`Express server running on http://localhost:${PORT}`);
 });

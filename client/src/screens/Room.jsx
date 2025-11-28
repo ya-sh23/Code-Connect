@@ -105,82 +105,88 @@ const RoomPage = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen gap-2 text-white">
-      <h1 className="text-4xl font-bold">Lobby</h1>
-      <h4>{remoteSocketId ? "Connected" : "Waiting for user..."}</h4>
+    <div className="flex gap-2">
+      <div className="flex flex-col justify-center ml-8 items-left min-h-screen text-white pb-8">
+        <h1 className="text-4xl font-bold"></h1>
+        <h4 className="">{remoteSocketId ? "Connected" : "Waiting for user..."}</h4>
 
-      {remoteSocketId && (
-        <>
-          {!isCallActive ? (
-            <button
-              className="bg-green-600 px-6 py-3 rounded-lg cursor-pointer"
-              onClick={async () => {
-                await handleCallUser();
-                setIsCallActive(true);
+        {remoteSocketId && (
+          <>
+            {!isCallActive && (
+              <button
+                className="bg-green-600 px-6 py-3 rounded-lg cursor-pointer"
+                onClick={async () => {
+                  await handleCallUser();
+                  setIsCallActive(true);
+                }}
+              >
+                📞 Call
+              </button>
+            )}
+          </>
+        )}
+
+        {myStream && (
+          <>
+            <h2>My Stream</h2>
+            <video
+              autoPlay
+              muted
+              ref={(vid) => {
+                if (vid) vid.srcObject = myStream;
               }}
-            >
-              📞 Call
-            </button>
-          ) : (
-            <button
-              className="bg-red-600 px-6 py-3 rounded-lg cursor-pointer"
-              onClick={() => {
-                peer.peer.close();
-                myStream?.getTracks().forEach((track) => track.stop());
-                setMyStream(null);
-                setRemoteStream(null);
-                setIsCallActive(false);
-                setRemoteSocketId(null);
-                navigate("/");
+              className="h-[300px] w-[400px] rounded-lg border border-white/30 p-4"
+            />
+
+            <div className="flex gap-4 mt-4">
+              <button
+                onClick={handleToggleAudio}
+                className="bg-gray-700 px-4 py-2 rounded-md"
+              >
+                {isMuted ? "🔇 Unmute" : "🎙️ Mute"}
+              </button>
+              <button
+                onClick={handleToggleVideo}
+                className="bg-gray-700 px-4 py-2 rounded-md"
+              >
+                {isVideoOff ? "📷 Start Video" : "📹 Stop Video"}
+              </button>
+              {isCallActive && (
+                <button
+                  className="bg-red-600 px-4 py-2 rounded-lg cursor-pointer"
+                  onClick={() => {
+                    peer.peer.close();
+                    myStream?.getTracks().forEach((track) => track.stop());
+                    setMyStream(null);
+                    setRemoteStream(null);
+                    setIsCallActive(false);
+                    setRemoteSocketId(null);
+                    navigate("/");
+                  }}
+                >
+                  🔴 Disconnect
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
+        {remoteStream && (
+          <>
+            <h2>Remote Stream</h2>
+            <video
+              autoPlay
+              ref={(vid) => {
+                if (vid) vid.srcObject = remoteStream;
               }}
-            >
-              🔴 Disconnect
-            </button>
-          )}
-        </>
-      )}
-
-      {myStream && (
-        <>
-          <h2>My Stream</h2>
-          <video
-            autoPlay
-            muted
-            ref={(vid) => {
-              if (vid) vid.srcObject = myStream;
-            }}
-            className="h-[300px] w-[500px] rounded-lg border border-white/30 mt-4"
-          />
-
-          <div className="flex gap-4 mt-4">
-            <button
-              onClick={handleToggleAudio}
-              className="bg-gray-700 px-4 py-2 rounded-md"
-            >
-              {isMuted ? "🔇 Unmute" : "🎙️ Mute"}
-            </button>
-            <button
-              onClick={handleToggleVideo}
-              className="bg-gray-700 px-4 py-2 rounded-md"
-            >
-              {isVideoOff ? "📷 Start Video" : "📹 Stop Video"}
-            </button>
-          </div>
-        </>
-      )}
-
-      {remoteStream && (
-        <>
-          <h2>Remote Stream</h2>
-          <video
-            autoPlay
-            ref={(vid) => {
-              if (vid) vid.srcObject = remoteStream;
-            }}
-            className="h-[300px] w-[500px] rounded-lg border border-white/30 mt-4"
-          />
-        </>
-      )}
+              className="h-[300px] w-[400px] rounded-lg border border-white/30 mt-4"
+            />
+          </>
+        )}
+      </div>
+      <div className="flex bottom-4 right-4 text-white text-lg">
+        {remoteSocketId && <h1>text area</h1>}
+      </div>
     </div>
   );
 };
